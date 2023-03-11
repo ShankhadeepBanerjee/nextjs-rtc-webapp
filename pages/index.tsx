@@ -1,10 +1,19 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 type Props = {};
 
 export default function Index({}: Props) {
   return (
-    <div className="">
+    <div className="h-screen flex flex-col justify-center items-center">
+      <div className="flex gap-x-3">
+        <Link href="/chat" className="bg-red-400 p-2">
+          CHAT
+        </Link>
+        <Link href="/room" className="bg-red-400 p-2">
+          ROOM
+        </Link>
+      </div>
       <div></div>
       <div>
         <div>

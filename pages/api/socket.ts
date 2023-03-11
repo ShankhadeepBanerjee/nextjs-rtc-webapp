@@ -1,33 +1,41 @@
-import { Socket, Server } from 'socket.io';
-import type { NextApiRequest, NextApiResponse } from 'next'; 
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Server } from 'socket.io';
+import { MessageReceiveKey, MessageSendKey } from '../../lib/common/utils';
 
 
-import messageHandler from "../../lib/server/utils/sockets/messagehandler";
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+const SocketHandler = (req: NextApiRequest,
+  res: NextApiResponse) => {
+  if (res.socket?.server.io) {
+    console.log('Socket is already running')
+  } else {
+    console.log('Socket is initializing')
+    const io = new Server(res.socket?.server)
+    res.socket.server.io = io
 
-export default function SocketHandler(
-    req: NextApiRequest,
-    res: NextApiResponse
-  ) {
+    io.on('connection', socket => {
+      console.log('====================================');
+      console.log('New socket id : ', socket.id, 'Connected users: ', socket.client.conn.server.clientsCount);
+      console.log('====================================');
+
+      socket.on(MessageSendKey, msg => {
+        console.log('====================================');
+        console.log(msg);
+        console.log('====================================');
+        socket.broadcast.emit(MessageReceiveKey, msg)
+      });
+
+      socket.on('disconnect', r => {
+        console.log('====================================');
+        console.log('Disconnected id : ', r, 'Connected users: ', socket.client.conn.server.clientsCount);
+        console.log('====================================');
+      })
+
+    })
 
     
-  // It means that socket server was already initialised
-  if (res.socket.server.io) {
-    console.log("Already set up");
-    res.end();
-    return;
+  
   }
-
-  const io = new Server(res.socket.server);
-  res.socket.server.io = io;
-
-  const onConnection = (socket : Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
-    messageHandler(socket);
-  };
-
-  // Define actions inside
-  io.on("connection", onConnection);
-
-  console.log("Setting up socket");
-  res.end();
+  res.end()
 }
+
+export default SocketHandler
