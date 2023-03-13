@@ -7,11 +7,8 @@ export default function Index({}: Props) {
   return (
     <div className="h-screen flex flex-col justify-center items-center">
       <div className="flex gap-x-3">
-        <Link href="/chat" className="bg-red-400 p-2">
-          CHAT
-        </Link>
-        <Link href="/room" className="bg-red-400 p-2">
-          ROOM
+        <Link href="/room2#init" className="bg-red-400 p-2">
+          + Create Room
         </Link>
       </div>
       <div></div>
