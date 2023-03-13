@@ -1,22 +1,28 @@
-import React, { useEffect, useRef } from "react";
+import React, { HTMLAttributes, useEffect, useRef } from "react";
 
-type Props = { stream: MediaStream };
+type Props = {
+  stream: MediaStream;
+  className?: HTMLAttributes<HTMLDivElement>["className"];
+  audio?: boolean;
+};
 
-export const VideoPlayer = ({ stream }: Props) => {
+export const VideoPlayer = ({ stream, className, audio = false }: Props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (stream && !videoRef.current.srcObject) {
-      console.log("====================================");
-      console.log("getting stream in videplayer ", stream);
-      console.log("====================================");
       videoRef.current.srcObject = stream;
     }
   }, [videoRef, stream]);
 
   return (
-    <div className="w-56 h-56">
-      <video className="w-full h-full" ref={videoRef} autoPlay></video>
+    <div className={className}>
+      <video
+        className="w-full h-full"
+        ref={videoRef}
+        autoPlay
+        muted={!audio}
+      ></video>
     </div>
   );
 };
