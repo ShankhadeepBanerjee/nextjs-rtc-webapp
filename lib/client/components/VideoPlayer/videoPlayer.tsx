@@ -18,10 +18,12 @@ export const VideoPlayer = ({ stream, className, audio = false }: Props) => {
   return (
     <div className={className}>
       <video
-        className="w-full h-full"
+        className="pointer-events-none h-full w-full rounded-lg"
         ref={videoRef}
         autoPlay
         muted={!audio}
+        playsInline
+        controls={false}
       ></video>
     </div>
   );
