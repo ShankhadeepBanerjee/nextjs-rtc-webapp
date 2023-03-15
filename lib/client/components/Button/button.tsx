@@ -3,7 +3,7 @@ import React, { HTMLAttributes } from "react";
 
 type Props = {
   className?: HTMLAttributes<HTMLButtonElement>;
-  children: JSX.Element | string;
+  children: React.ReactNode | string;
 };
 
 export const Button = ({
