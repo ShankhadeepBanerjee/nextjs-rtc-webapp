@@ -41,11 +41,14 @@ export const VideoPlayer = ({ stream, className, audio = false }: Props) => {
 
   return (
     <div
-      className={classnames("origin-center scale-0 transform", className)}
+      className={classnames(
+        "relative flex w-full origin-center scale-0 transform items-center justify-center",
+        className
+      )}
       ref={divRef}
     >
       <video
-        className="pointer-events-none h-full w-full rounded-lg"
+        className="pointer-events-none absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2 rounded-lg"
         ref={videoRef}
         autoPlay
         muted={!audio}

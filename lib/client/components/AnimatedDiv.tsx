@@ -28,7 +28,7 @@ export const AnimatedDiv = () => {
   return (
     <div
       ref={divRef}
-      className="min-w-[24rem] max-w-[48rem] flex-1 origin-center scale-0 transform bg-primary-400"
+      className=" min-w-[24rem] max-w-[48rem] flex-1 origin-center scale-0 transform bg-primary-400"
     ></div>
   );
 };
