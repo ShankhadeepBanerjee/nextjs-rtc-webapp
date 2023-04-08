@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Server } from 'socket.io';
-import { MessageReceiveKey, MessageSendKey } from '../../lib/common/utils';
+import { MessageReceiveKey, MessageSendKey } from '../../../lib/common/utils';
 
 
 const SocketHandler = (req: NextApiRequest,
