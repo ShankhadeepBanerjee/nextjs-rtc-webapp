@@ -4,25 +4,32 @@ import React, { HTMLAttributes } from "react";
 type Props = {
   className?: HTMLAttributes<HTMLButtonElement>;
   children: React.ReactNode | string;
+  variant?: "primary" | "dark" | "light";
 };
 
 export const Button = ({
   children,
   className,
+  variant = "primary",
   ...rest
 }: Props &
   React.DetailedHTMLProps<
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   >) => {
+  const colors = {
+    primary: "bg-primary text-dark active:bg-dark active:text-white",
+    dark: "bg-dark text-white active:bg-primary active:text-dark",
+    light: "bg-light text-dark active:bg-dark active:text-white",
+  };
+
   return (
     <button
       className={classNames(
-        "bg-primary",
-        "text-dark",
+        colors[variant],
         "p-2",
         "transition duration-150 ease-in-out",
-        "active:bg-dark active:text-white active:ring-1",
+        "active:ring-1",
         className
       )}
       {...rest}
