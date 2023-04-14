@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import io, { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { CreateRoomKey, JoinRoomKey } from "../../common/utils";
+import { CHAT_CreateRoomKey, CHAT_JoinRoomKey } from "../../common/utils";
 
 interface SocketContextType {
   socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
@@ -69,11 +69,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const createRoom = (username: string) => {
-    socket?.emit(CreateRoomKey, username);
+    socket?.emit(CHAT_CreateRoomKey, username);
   };
 
   const joinRoom = (roomId: string) => {
-    socket?.emit(JoinRoomKey, { roomId });
+    socket?.emit(CHAT_JoinRoomKey, { roomId });
   };
 
   const leaveRoom = (roomId: string) => {

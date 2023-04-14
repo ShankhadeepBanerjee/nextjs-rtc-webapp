@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { Loader } from "../../lib/client/components";
 import { useSocket } from "../../lib/client/contexts/SocketProvider";
-import { RoomCreatedKey } from "../../lib/common/utils";
+import { CHAT_RoomCreatedKey } from "../../lib/common/utils";
 
 type Props = {};
 
@@ -15,7 +15,7 @@ export default function Chat({}: Props) {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on(RoomCreatedKey, (roomId: string) => {
+    socket.on(CHAT_RoomCreatedKey, (roomId: string) => {
       console.log("====================================");
       console.log("room created with id: ", roomId);
       console.log("====================================");

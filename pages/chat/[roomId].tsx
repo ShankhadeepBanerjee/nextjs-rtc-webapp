@@ -1,6 +1,9 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { MessageReceiveKey, MessageSendKey } from "../../lib/common/utils";
+import {
+  CHAT_MessageReceiveKey,
+  CHAT_MessageSendKey,
+} from "../../lib/common/utils";
 import { Loader } from "../../lib/client/components";
 import { useSocket } from "../../lib/client/contexts/SocketProvider";
 
@@ -22,8 +25,8 @@ const NewChat = () => {
 
   useEffect(() => {
     if (!socket || !roomId) return;
-    socket?.off(MessageReceiveKey);
-    socket?.on(MessageReceiveKey, (newChat: string) => {
+    socket?.off(CHAT_MessageReceiveKey);
+    socket?.on(CHAT_MessageReceiveKey, (newChat: string) => {
       console.log("Getting new message: ", newChat);
       setChats((prevChats) => [...prevChats, newChat]);
     });
@@ -33,7 +36,7 @@ const NewChat = () => {
     console.log("====================================");
     console.log("Sending message: ", message);
     console.log("====================================");
-    socket?.emit(MessageSendKey, { roomId, message });
+    socket?.emit(CHAT_MessageSendKey, { roomId, message });
     // setChats((prevChats) => [...prevChats, message]);
     inputRef.current?.focus();
   };
