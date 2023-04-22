@@ -9,8 +9,12 @@ type Props = {};
 export default function Chat({}: Props) {
   const usernameRef = useRef<HTMLInputElement>(null);
   const roomIdRef = useRef<HTMLInputElement>(null);
-  const { socket, isLoading, createRoom } = useSocket();
+  const { socket, isLoading, socketConnect, createRoom } = useSocket();
   const router = useRouter();
+
+  useEffect(() => {
+    socketConnect();
+  }, []);
 
   useEffect(() => {
     if (!socket) return;

@@ -6,22 +6,35 @@ import {
 } from "../../lib/common/utils";
 import { Loader } from "../../lib/client/components";
 import { useSocket } from "../../lib/client/contexts/SocketProvider";
+import classnames from "classnames";
 
 const NewChat = () => {
   const [chats, setChats] = useState<string[]>([]);
   const { socket, isLoading, joinRoom, leaveRoom } = useSocket();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { socketConnect, socketDisconnect, isConnected } = useSocket();
   const router = useRouter();
   const { roomId } = router.query as { roomId: string };
 
   const roomJoinedRef = useRef(false);
 
   useEffect(() => {
+    if (!socket) socketConnect();
+    return () => {
+      if (socket) socketDisconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (router.isReady && !roomId) {
+      router.push("/");
+    }
+
     if (roomId && !roomJoinedRef.current) {
       joinRoom(roomId);
       roomJoinedRef.current = true;
     }
-  }, [roomId]);
+  }, [joinRoom, roomId, router]);
 
   useEffect(() => {
     if (!socket || !roomId) return;
@@ -60,10 +73,21 @@ const NewChat = () => {
     <div className="flex h-screen flex-col bg-light">
       <header className="flex items-center justify-between bg-dark p-4 text-light">
         <h1 className="text-lg font-bold">Room {roomId}</h1>
+        <h2
+          className={classnames(
+            isConnected
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700",
+            "rounded-lg p-2"
+          )}
+        >
+          {isConnected ? "Connected" : "Disconnected"}
+        </h2>
         <button
-          className="rounded-lg bg-primary px-4 py-2 text-light"
+          className="rounded-lg bg-primary px-4 py-2 text-dark"
           onClick={() => {
             leaveRoom(roomId);
+            socketDisconnect();
             router.push("/");
           }}
         >
@@ -91,7 +115,7 @@ const NewChat = () => {
             onKeyDown={handleKeyDown}
           />
           <button
-            className="ml-2 rounded-lg bg-primary px-4 py-2 text-light"
+            className="ml-2 rounded-lg bg-primary px-4 py-2 text-dark"
             onClick={() => inputRef.current?.focus()}
           >
             Send

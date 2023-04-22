@@ -14,18 +14,24 @@ interface SocketContextType {
   socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
   isLoading: boolean;
   error: any;
+  isConnected: boolean;
   createRoom: (username: string) => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: (roomId: string) => void;
+  socketConnect: () => void;
+  socketDisconnect: () => void;
 }
 
 export const SocketContext = createContext<SocketContextType>({
   socket: null,
   isLoading: true,
   error: null,
+  isConnected: false,
   createRoom: (username: string) => {},
   joinRoom: (roomId: string) => {},
   leaveRoom: (roomId: string) => {},
+  socketConnect: () => {},
+  socketDisconnect: () => {},
 });
 
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
@@ -33,40 +39,55 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     DefaultEventsMap,
     DefaultEventsMap
   > | null>(null);
+
+  const socketConnectedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-  const socketConnectedRef = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    const init = async () => {
-      if (socketConnectedRef.current) return;
-      socketConnectedRef.current = true;
+  const socketConnect = () => {
+    if (socketConnectedRef.current) {
+      console.log("====================================");
+      console.log("Socket already connected");
+      console.log("====================================");
+      setIsConnected(true);
+      return;
+    }
+    socketConnectedRef.current = true;
 
-      console.log("Fetching server again");
+    console.log("Fetching server again");
 
-      await fetch(`${process.env.NX_BASE_URL}/socket`); // init socket server
-      const newSocket = io();
+    fetch(`${process.env.NX_BASE_URL}/socket`) // init socket server
+      .then(() => {
+        const newSocket = io();
+        setSocket(newSocket);
 
-      setSocket(newSocket);
+        newSocket.on("connect", () => {
+          console.log("Connected to socket server");
+          setIsLoading(false);
+          setIsConnected(true);
+        });
 
-      newSocket.on("connect", () => {
-        console.log("Connected to socket server");
-        setIsLoading(false);
-      });
-
-      newSocket.on("connect_error", (err) => {
-        console.log("Socket connection error: ", err);
+        newSocket.on("connect_error", (err) => {
+          console.log("Socket connection error: ", err);
+          setIsLoading(false);
+          setError(err);
+          setIsConnected(false);
+        });
+      })
+      .catch((err) => {
+        console.log("Error fetching socket server: ", err);
         setIsLoading(false);
         setError(err);
       });
-    };
+  };
 
-    init();
-
-    return () => {
-      socket?.disconnect();
-    };
-  }, []);
+  const socketDisconnect = () => {
+    socket?.disconnect();
+    setSocket(null);
+    socketConnectedRef.current = false;
+    setIsConnected(false);
+  };
 
   const createRoom = (username: string) => {
     socket?.emit(CHAT_CreateRoomKey, username);
@@ -86,9 +107,12 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         socket,
         isLoading,
         error,
+        isConnected,
         createRoom,
         joinRoom,
         leaveRoom,
+        socketConnect,
+        socketDisconnect,
       }}
     >
       {children}
@@ -97,14 +121,26 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useSocket = () => {
-  const { socket, isLoading, error, createRoom, joinRoom, leaveRoom } =
-    useContext(SocketContext);
+  const {
+    socket,
+    isLoading,
+    error,
+    isConnected,
+    createRoom,
+    joinRoom,
+    leaveRoom,
+    socketConnect,
+    socketDisconnect,
+  } = useContext(SocketContext);
   return {
     socket,
     isLoading,
     error,
+    isConnected,
     createRoom,
     joinRoom,
     leaveRoom,
+    socketConnect,
+    socketDisconnect,
   };
 };
