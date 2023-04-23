@@ -12,18 +12,11 @@ const NewChat = () => {
   const [chats, setChats] = useState<string[]>([]);
   const { socket, isLoading, joinRoom, leaveRoom } = useSocket();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { socketConnect, socketDisconnect, isConnected } = useSocket();
+  const { socketDisconnect, isConnected } = useSocket();
   const router = useRouter();
   const { roomId } = router.query as { roomId: string };
 
   const roomJoinedRef = useRef(false);
-
-  useEffect(() => {
-    if (!socket) socketConnect();
-    return () => {
-      if (socket) socketDisconnect();
-    };
-  }, []);
 
   useEffect(() => {
     if (router.isReady && !roomId) {

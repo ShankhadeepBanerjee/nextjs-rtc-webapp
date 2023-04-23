@@ -1,19 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/router";
-import { Loader } from "../../lib/client/components";
+import { Button, Loader } from "../../lib/client/components";
 import { useSocket } from "../../lib/client/contexts/SocketProvider";
 import { CHAT_RoomCreatedKey } from "../../lib/common/utils";
 
 type Props = {};
 
 export default function Chat({}: Props) {
-  const usernameRef = useRef<HTMLInputElement>(null);
   const roomIdRef = useRef<HTMLInputElement>(null);
-  const { socket, isLoading, socketConnect, createRoom } = useSocket();
+  const {
+    socket,
+    isLoading,
+    socketConnect,
+    createRoom,
+    socketDisconnect,
+    isConnected,
+  } = useSocket();
   const router = useRouter();
 
   useEffect(() => {
-    socketConnect();
+    if (!isConnected) socketConnect();
+    return () => {
+      if (isConnected) socketDisconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -27,20 +36,20 @@ export default function Chat({}: Props) {
     });
   }, [socket]);
 
-  const initCreateRoom = () => {
-    const username = usernameRef.current?.value;
-    if (username && socket) {
-      console.log("creating room with username: ", username);
-      createRoom(username);
+  const handleCreateRoom = () => {
+    console.log("====================================");
+    console.log(socket);
+    console.log("====================================");
+    if (socket) {
+      createRoom("random user");
     }
   };
 
-  const joinRoom = () => {
+  const handleJoinRoom = () => {
     const roomId = roomIdRef.current?.value;
-    const username = usernameRef.current?.value;
-    if (roomId && username && socket) {
+    if (roomId && socket) {
       console.log("joining room with id: ", roomId);
-      router.push(`/chat/${roomId}`);
+      return router.push(`/chat/${roomId}`);
     }
   };
 
@@ -49,38 +58,32 @@ export default function Chat({}: Props) {
   }
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-light">
-      <h1 className="mb-5 text-2xl text-dark">This is a socket app</h1>
-      <form className="flex flex-col items-center">
+    <div className="flex h-screen flex-col items-center justify-center bg-dark">
+      <div>
+        <Button
+          className="rounded-lg px-5 font-semibold"
+          onClick={handleCreateRoom}
+        >
+          Create A New Room
+        </Button>
+      </div>
+      <p className="my-5 text-lg font-semibold text-light">
+        <i>or,</i>
+      </p>
+      <span className="flex items-center gap-x-5">
         <input
           type="text"
-          ref={usernameRef}
-          className="mb-3 w-full rounded-l-md bg-light px-2 py-1 text-dark"
-          placeholder="Enter username..."
-        />
-        <input
-          type="text"
+          className="rounded-md p-2 text-dark"
+          placeholder="Enter a code or Link"
           ref={roomIdRef}
-          className="mb-3 w-full rounded-l-md bg-light px-2 py-1 text-dark"
-          placeholder="Enter room ID..."
         />
-        <div className="flex">
-          <button
-            type="button"
-            className="rounded-l-md bg-primary px-3 py-1 text-dark transition-all duration-200 ease-in-out hover:bg-dark hover:text-light"
-            onClick={initCreateRoom}
-          >
-            Create Room
-          </button>
-          <button
-            type="button"
-            className="rounded-r-md bg-primary px-3 py-1 text-dark transition-all duration-200 ease-in-out hover:bg-dark hover:text-light"
-            onClick={joinRoom}
-          >
-            Join Room
-          </button>
-        </div>
-      </form>
+        <Button
+          className="rounded-lg px-5 font-semibold"
+          onClick={handleJoinRoom}
+        >
+          join
+        </Button>
+      </span>
     </div>
   );
 }
