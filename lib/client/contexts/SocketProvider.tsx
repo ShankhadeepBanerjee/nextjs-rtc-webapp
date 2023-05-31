@@ -2,20 +2,20 @@ import React, {
   ReactNode,
   createContext,
   useContext,
-  useEffect,
   useRef,
   useState,
 } from "react";
 import io, { Socket } from "socket.io-client";
+import { MEET2_CreateRoomKey, MEET2_JoinRoomKey } from "../../common/utils";
+import { RoomCreateProps } from "../../common/types";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { CHAT_CreateRoomKey, CHAT_JoinRoomKey } from "../../common/utils";
 
 interface SocketContextType {
   socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
   isLoading: boolean;
   error: any;
   isConnected: boolean;
-  createRoom: (username: string) => void;
+  createRoom: (props?: RoomCreateProps) => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: (roomId: string) => void;
   socketConnect: () => void;
@@ -27,7 +27,7 @@ export const SocketContext = createContext<SocketContextType>({
   isLoading: true,
   error: null,
   isConnected: false,
-  createRoom: (username: string) => {},
+  createRoom: (props?: RoomCreateProps) => {},
   joinRoom: (roomId: string) => {},
   leaveRoom: (roomId: string) => {},
   socketConnect: () => {},
@@ -40,22 +40,18 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     DefaultEventsMap
   > | null>(null);
 
-  const socketConnectedRef = useRef(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const connectionRequestInProgressRef = useRef(false);
 
   const socketConnect = () => {
-    if (socketConnectedRef.current) {
-      console.log("====================================");
-      console.log("Socket already connected");
-      console.log("====================================");
-      setIsConnected(true);
+    if (connectionRequestInProgressRef.current || isConnected || isLoading) {
       return;
     }
-    socketConnectedRef.current = true;
 
-    console.log("Fetching server again");
+    connectionRequestInProgressRef.current = true;
+    setIsLoading(true);
 
     fetch(`${process.env.NX_BASE_URL}/socket`) // init socket server
       .then(() => {
@@ -64,14 +60,22 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
         newSocket.on("connect", () => {
           console.log("Connected to socket server");
-          setIsLoading(false);
           setIsConnected(true);
+          setIsLoading(false);
+          connectionRequestInProgressRef.current = false;
         });
 
         newSocket.on("connect_error", (err) => {
           console.log("Socket connection error: ", err);
-          setIsLoading(false);
           setError(err);
+          setIsConnected(false);
+          setIsLoading(false);
+          connectionRequestInProgressRef.current = false;
+        });
+
+        newSocket.on("disconnect", () => {
+          console.log("Disconnected from socket server");
+          setIsLoading(false);
           setIsConnected(false);
         });
       })
@@ -79,22 +83,21 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         console.log("Error fetching socket server: ", err);
         setIsLoading(false);
         setError(err);
+        setIsConnected(false);
       });
   };
 
   const socketDisconnect = () => {
     socket?.disconnect();
     setSocket(null);
-    socketConnectedRef.current = false;
-    setIsConnected(false);
   };
 
-  const createRoom = (username: string) => {
-    socket?.emit(CHAT_CreateRoomKey, username);
+  const createRoom = (props?: RoomCreateProps) => {
+    socket?.emit(MEET2_CreateRoomKey, props);
   };
 
   const joinRoom = (roomId: string) => {
-    socket?.emit(CHAT_JoinRoomKey, { roomId });
+    socket?.emit(MEET2_JoinRoomKey, { roomId });
   };
 
   const leaveRoom = (roomId: string) => {
@@ -132,6 +135,7 @@ export const useSocket = () => {
     socketConnect,
     socketDisconnect,
   } = useContext(SocketContext);
+
   return {
     socket,
     isLoading,
