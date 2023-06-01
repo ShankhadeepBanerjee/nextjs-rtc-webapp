@@ -1,13 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Peer from "simple-peer";
-import { VideoPlayer } from "../lib/client/components";
-import { Stream } from "stream";
+import { Button, ControlBtn, VideoPlayer } from "../lib/client/components";
+import { useStream } from "../lib/client/hooks";
+import router from "next/router";
+import {
+  BsCameraVideoFill,
+  BsCameraVideoOffFill,
+  BsFillMicFill,
+  BsFillMicMuteFill,
+} from "react-icons/bs";
 
 type Props = {};
 export default function Room2({}: Props) {
   const [peer, setPeer] = useState<Peer.Instance>();
 
-  const [myStream, setMyStream] = useState<MediaStream>();
+  // const [myStream, setMyStream] = useState<MediaStream>();
   const [peerStream, setPeerStream] = useState<MediaStream>();
 
   const [peerData, setpeerData] = useState<Peer.SignalData>();
@@ -27,18 +34,22 @@ export default function Room2({}: Props) {
   //     peer?.addStream(mediaStream);
   //     setMyStream(mediaStream);
   //   };
+  const {
+    stream: myStream,
+    cameraOn,
+    micOn,
+    toggleCamera,
+    toggleMic,
+  } = useStream({
+    video: true,
+    audio: true,
+  });
 
   const InitiatePeer = async () => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    //   peer?.addStream(mediaStream);
-    setMyStream(mediaStream);
     const newPeer = new Peer({
       initiator: location.hash === "#init",
       trickle: false,
-      stream: mediaStream,
+      stream: myStream,
     });
     setPeer(newPeer);
 
@@ -130,17 +141,33 @@ export default function Room2({}: Props) {
         Call
       </button> */}
 
-      <div className="flex">
-        {myStream && (
-          <VideoPlayer className="flex-1 max-w-[24rem]" stream={myStream} />
-        )}
-        {peerStream && (
+      <div className="flex h-screen w-full flex-wrap items-stretch justify-center gap-5 p-5">
+        {myStream ? (
           <VideoPlayer
-            className="flex-1 max-w-[24rem]"
-            stream={peerStream}
-            audio={true}
+            className="min-w-[24rem] max-w-[90vw] flex-1 overflow-hidden object-cover shadow-inner md:max-w-[50vw]"
+            stream={myStream}
           />
-        )}
+        ) : null}
+        {peerStream ? (
+          <VideoPlayer
+            className="min-w-[24rem] max-w-[90vw] flex-1 overflow-hidden object-cover shadow-inner md:max-w-[50vw]"
+            stream={peerStream}
+          />
+        ) : null}
+      </div>
+      <div className=" flex w-full items-center justify-center gap-x-10 py-5 ">
+        <ControlBtn on={cameraOn} onClick={toggleCamera} className="scale-125">
+          {cameraOn ? <BsCameraVideoFill /> : <BsCameraVideoOffFill />}
+        </ControlBtn>
+        <ControlBtn on={micOn} onClick={toggleMic} className="scale-125">
+          {micOn ? <BsFillMicFill /> : <BsFillMicMuteFill />}
+        </ControlBtn>
+        <Button
+          onClick={() => router.push("/")}
+          className="bg-red-600 text-white hover:bg-red-500 focus:bg-red-500"
+        >
+          Leave Meet
+        </Button>
       </div>
     </div>
   );
