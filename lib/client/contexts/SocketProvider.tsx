@@ -27,9 +27,9 @@ export const SocketContext = createContext<SocketContextType>({
   isLoading: true,
   error: null,
   isConnected: false,
-  createRoom: (props?: RoomCreateProps) => {},
-  joinRoom: (roomId: string) => {},
-  leaveRoom: (roomId: string) => {},
+  createRoom: () => {},
+  joinRoom: () => {},
+  leaveRoom: () => {},
   socketConnect: () => {},
   socketDisconnect: () => {},
 });

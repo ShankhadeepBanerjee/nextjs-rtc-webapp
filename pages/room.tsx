@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Peer, { DataConnection, MediaConnection } from "peerjs";
+import Peer, { MediaConnection } from "peerjs";
 import { useRouter } from "next/router";
 import { VideoPlayer } from "../lib/client/components";
 
@@ -99,7 +99,7 @@ export default function Room({}: Props) {
           onChange={(e) => setCallId(e.target.value)}
         />
         <button
-          className="bg-slate-400 p-4 rounded shadow-lg active:shadow-none"
+          className="rounded bg-slate-400 p-4 shadow-lg active:shadow-none"
           onClick={() => {
             if (callId) {
               makePeerConnection(callId);
@@ -112,7 +112,7 @@ export default function Room({}: Props) {
 
       <div>
         <button
-          className="bg-slate-400 p-4 rounded shadow-lg active:shadow-none"
+          className="rounded bg-slate-400 p-4 shadow-lg active:shadow-none"
           onClick={dialCall}
         >
           Start Video Call

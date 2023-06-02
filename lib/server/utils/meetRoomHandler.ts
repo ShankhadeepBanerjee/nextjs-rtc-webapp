@@ -12,18 +12,14 @@ import {
   MEET_SendPeerAnswerKey,
   MEET_ReceivePeerAnswerKey,
 } from "../../common/utils";
-import {
-  PeerAnserProps,
-  PeerOfferProps,
-  RoomCreateProps,
-} from "../../common/types";
+import { PeerAnserProps, PeerOfferProps } from "../../common/types";
 
 export const meetRoomHandler = (
   socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
 ) => {
   try {
-    socket.on(MEET_CreateRoomKey, (props: RoomCreateProps) => {
+    socket.on(MEET_CreateRoomKey, () => {
       console.log("Here creating in server");
       const roomId = Math.random().toString(36).substring(7); // generate a random room ID
       socket.join(roomId);

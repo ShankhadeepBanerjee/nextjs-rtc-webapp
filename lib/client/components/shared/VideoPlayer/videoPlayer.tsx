@@ -1,5 +1,5 @@
 import anime from "animejs";
-import React, { HTMLAttributes, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 type Props = {

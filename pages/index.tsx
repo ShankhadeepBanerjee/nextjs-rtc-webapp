@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "../lib/client/components";
-import { routes } from "../lib/client/utils";
 import Hero from "../public/hero.png";
 import { BiVideoPlus } from "react-icons/bi";
 import { useRouter } from "next/router";
@@ -14,8 +12,7 @@ type Props = {};
 export default function Index({}: Props) {
   const router = useRouter();
   const [roomId, setRoomId] = useState("");
-  const { socket, isLoading, createRoom, isConnected, socketConnect } =
-    useSocket();
+  const { socket, createRoom, socketConnect } = useSocket();
 
   useEffect(() => {
     if (!socket) return;

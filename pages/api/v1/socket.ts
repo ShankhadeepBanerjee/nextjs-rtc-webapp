@@ -1,8 +1,41 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import { Server } from "socket.io";
 import { chatRoomHandler, meetRoomHandler } from "../../../lib/server/utils";
 
-const SocketHandler = (req: NextApiRequest, res: NextApiResponse) => {
+import type { Server as HTTPServer } from "http";
+import { Socket as NetSocket } from "net";
+import type { Server as IOServer } from "socket.io";
+
+interface SocketServer extends HTTPServer {
+  io?: IOServer | undefined;
+}
+
+class SocketWithIO extends NetSocket {
+  private _server: SocketServer;
+
+  constructor(server: SocketServer) {
+    super();
+    this._server = server;
+  }
+
+  public get server(): SocketServer {
+    return this._server;
+  }
+}
+
+interface SocketServer extends HTTPServer {
+  io?: IOServer | undefined;
+}
+
+interface SocketWithIO extends NetSocket {
+  server: SocketServer;
+}
+
+interface NextApiResponseWithSocket extends NextApiResponse {
+  socket: SocketWithIO;
+}
+
+const SocketHandler = (res: NextApiResponseWithSocket) => {
   if (res.socket?.server.io) {
     console.log("Socket is already running");
   } else {
@@ -11,29 +44,11 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse) => {
     res.socket.server.io = io;
 
     io.on("connection", (socket) => {
-      console.log("====================================");
-      console.log(
-        "New socket id : ",
-        socket.id,
-        "Connected users: ",
-        socket.client.conn.server.clientsCount
-      );
-      console.log("====================================");
-
       chatRoomHandler(socket, io);
       meetRoomHandler(socket, io);
 
       socket.on("disconnect", (reason) => {
         console.log(reason);
-
-        console.log("====================================");
-        console.log(
-          "Disconnected id : ",
-          socket.id,
-          "Connected users: ",
-          socket.client.conn.server.clientsCount
-        );
-        console.log("====================================");
         // io.in(roomId).emit('userDisconnected', socket.id); // notify other users in the room that this user has disconnected
       });
     });

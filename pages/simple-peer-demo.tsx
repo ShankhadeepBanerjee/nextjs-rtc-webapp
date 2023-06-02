@@ -144,13 +144,19 @@ export default function Room2({}: Props) {
       <div className="flex h-screen w-full flex-wrap items-stretch justify-center gap-5 p-5">
         {myStream ? (
           <VideoPlayer
-            className="min-w-[24rem] max-w-[90vw] flex-1 overflow-hidden object-cover shadow-inner md:max-w-[50vw]"
+            classNames={{
+              container:
+                "min-w-[24rem] max-w-[90vw] flex-1 overflow-hidden object-cover shadow-inner md:max-w-[50vw]",
+            }}
             stream={myStream}
           />
         ) : null}
         {peerStream ? (
           <VideoPlayer
-            className="min-w-[24rem] max-w-[90vw] flex-1 overflow-hidden object-cover shadow-inner md:max-w-[50vw]"
+            classNames={{
+              container:
+                "min-w-[24rem] max-w-[90vw] flex-1 overflow-hidden object-cover shadow-inner md:max-w-[50vw]",
+            }}
             stream={peerStream}
           />
         ) : null}

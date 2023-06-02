@@ -41,7 +41,7 @@ export default function Chat({}: Props) {
     console.log(socket);
     console.log("====================================");
     if (socket) {
-      createRoom("random user");
+      createRoom();
     }
   };
 
