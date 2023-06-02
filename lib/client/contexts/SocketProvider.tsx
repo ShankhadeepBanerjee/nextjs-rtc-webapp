@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import io, { Socket } from "socket.io-client";
-import { MEET2_CreateRoomKey, MEET2_JoinRoomKey } from "../../common/utils";
+import { MEET_CreateRoomKey, MEET_JoinRoomKey } from "../../common/utils";
 import { RoomCreateProps } from "../../common/types";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
@@ -93,11 +93,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const createRoom = (props?: RoomCreateProps) => {
-    socket?.emit(MEET2_CreateRoomKey, props);
+    socket?.emit(MEET_CreateRoomKey, props);
   };
 
   const joinRoom = (roomId: string) => {
-    socket?.emit(MEET2_JoinRoomKey, { roomId });
+    socket?.emit(MEET_JoinRoomKey, { roomId });
   };
 
   const leaveRoom = (roomId: string) => {

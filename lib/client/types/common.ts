@@ -1,1 +1,1 @@
-export type MeetStatus = 'joining' | 'joined';
+export type MeetStatus = "joining" | "joined";

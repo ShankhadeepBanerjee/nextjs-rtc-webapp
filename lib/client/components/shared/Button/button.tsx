@@ -1,5 +1,5 @@
-import classNames from "classnames";
 import React, { HTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
   className?: HTMLAttributes<HTMLButtonElement>;
@@ -25,7 +25,7 @@ export const Button = ({
 
   return (
     <button
-      className={classNames(
+      className={twMerge(
         colors[variant],
         "p-2",
         "transition duration-150 ease-in-out",

@@ -9,23 +9,28 @@ import { VideoPlayer, ControlBtn } from "./shared";
 
 type Props = {
   stream: MediaStream;
-  cameraOn: boolean;
-  micOn: boolean;
-  toggleCamera: () => void;
-  toggleMic: () => void;
+  cameraOn?: boolean;
+  micOn?: boolean;
+  toggleCamera?: () => void;
+  toggleMic?: () => void;
 };
 
 export const JoiningTestStream = ({
   stream,
-  cameraOn,
-  micOn,
-  toggleCamera,
-  toggleMic,
+  cameraOn = true,
+  micOn = true,
+  toggleCamera = () => {},
+  toggleMic = () => {},
 }: Props) => {
   return (
-    <div className="relative flex h-2/3 flex-1 overflow-hidden p-10">
-      {stream && <VideoPlayer className="  shadow-inner" stream={stream} />}
-      <div className="absolute bottom-0 flex w-full items-center justify-center gap-x-10 py-4 ">
+    <div className="relative flex h-2/3 w-full flex-1 overflow-hidden  p-10 lg:w-auto">
+      {stream && (
+        <VideoPlayer
+          classNames={{ container: "shadow-inner" }}
+          stream={stream}
+        />
+      )}
+      <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-x-10 py-4 ">
         <ControlBtn on={cameraOn} onClick={toggleCamera} className="scale-125">
           {cameraOn ? <BsCameraVideoFill /> : <BsCameraVideoOffFill />}
         </ControlBtn>

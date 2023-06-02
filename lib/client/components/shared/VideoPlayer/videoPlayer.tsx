@@ -1,19 +1,22 @@
 import anime from "animejs";
-import classnames from "classnames";
 import React, { HTMLAttributes, useEffect, useRef } from "react";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
   stream: MediaStream;
-  className?: HTMLAttributes<HTMLDivElement>["className"];
+  classNames?: {
+    container?: string;
+    video?: string;
+  };
   audio?: boolean;
 };
 
-export const VideoPlayer = ({ stream, className, audio = false }: Props) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+export const VideoPlayer = ({ stream, classNames, audio = false }: Props) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (stream && !videoRef.current.srcObject) {
+    if (stream && videoRef.current && !videoRef.current?.srcObject) {
       videoRef.current.srcObject = stream;
     }
   }, [videoRef, stream]);
@@ -41,14 +44,17 @@ export const VideoPlayer = ({ stream, className, audio = false }: Props) => {
 
   return (
     <div
-      className={classnames(
+      className={twMerge(
         "relative flex w-full origin-center scale-0 transform items-center justify-center",
-        className
+        classNames?.container
       )}
       ref={divRef}
     >
       <video
-        className="pointer-events-none absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2 rounded-lg"
+        className={twMerge(
+          "pointer-events-none absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2 rounded-lg",
+          classNames?.video
+        )}
         ref={videoRef}
         autoPlay
         muted={!audio}
