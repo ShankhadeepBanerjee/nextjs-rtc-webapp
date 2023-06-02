@@ -53,7 +53,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     connectionRequestInProgressRef.current = true;
     setIsLoading(true);
 
-    fetch(`${process.env.NX_BASE_URL}/socket`) // init socket server
+    fetch(`/api/v1/socket`) // init socket server
       .then(() => {
         const newSocket = io();
         setSocket(newSocket);

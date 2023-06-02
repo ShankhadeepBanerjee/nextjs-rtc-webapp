@@ -1,4 +1,4 @@
-import { NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from "next";
 import { Server } from "socket.io";
 import { chatRoomHandler, meetRoomHandler } from "../../../lib/server/utils";
 
@@ -34,10 +34,12 @@ interface SocketWithIO extends NetSocket {
 interface NextApiResponseWithSocket extends NextApiResponse {
   socket: SocketWithIO;
 }
-
-const SocketHandler = (res: NextApiResponseWithSocket) => {
+const SocketHandler = (
+  _req: NextApiRequest,
+  res: NextApiResponseWithSocket
+) => {
   if (res.socket?.server.io) {
-    console.log("Socket is already running");
+    res.status(200).send("Socket already initialized");
   } else {
     console.log("Socket is initializing");
     const io = new Server(res.socket?.server);
@@ -49,12 +51,10 @@ const SocketHandler = (res: NextApiResponseWithSocket) => {
 
       socket.on("disconnect", (reason) => {
         console.log(reason);
-        // io.in(roomId).emit('userDisconnected', socket.id); // notify other users in the room that this user has disconnected
       });
     });
+    res.status(200).send("Socket initialized");
   }
-
-  res.end();
 };
 
 export default SocketHandler;

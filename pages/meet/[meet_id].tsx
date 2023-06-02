@@ -256,6 +256,7 @@ export default function Meet({}: Props) {
               ),
             }}
             stream={peerStream}
+            audio
           />
         ) : null}
         {myStream ? (
@@ -270,7 +271,6 @@ export default function Meet({}: Props) {
               video: twMerge("w-full"),
             }}
             stream={myStream}
-            audio={true}
           />
         ) : null}
       </div>
