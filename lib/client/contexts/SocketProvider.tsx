@@ -53,38 +53,29 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     connectionRequestInProgressRef.current = true;
     setIsLoading(true);
 
-    fetch(`/api/v1/socket`) // init socket server
-      .then(() => {
-        const newSocket = io();
-        setSocket(newSocket);
+    const newSocket = io(`${process.env.NX_BASE_URL}`);
+    setSocket(newSocket);
 
-        newSocket.on("connect", () => {
-          console.log("Connected to socket server");
-          setIsConnected(true);
-          setIsLoading(false);
-          connectionRequestInProgressRef.current = false;
-        });
+    newSocket.on("connect", () => {
+      console.log("Connected to socket server");
+      setIsConnected(true);
+      setIsLoading(false);
+      connectionRequestInProgressRef.current = false;
+    });
 
-        newSocket.on("connect_error", (err) => {
-          console.log("Socket connection error: ", err);
-          setError(err);
-          setIsConnected(false);
-          setIsLoading(false);
-          connectionRequestInProgressRef.current = false;
-        });
+    newSocket.on("connect_error", (err) => {
+      console.log("Socket connection error: ", err);
+      setError(err);
+      setIsConnected(false);
+      setIsLoading(false);
+      connectionRequestInProgressRef.current = false;
+    });
 
-        newSocket.on("disconnect", () => {
-          console.log("Disconnected from socket server");
-          setIsLoading(false);
-          setIsConnected(false);
-        });
-      })
-      .catch((err) => {
-        console.log("Error fetching socket server: ", err);
-        setIsLoading(false);
-        setError(err);
-        setIsConnected(false);
-      });
+    newSocket.on("disconnect", () => {
+      console.log("Disconnected from socket server");
+      setIsLoading(false);
+      setIsConnected(false);
+    });
   };
 
   const socketDisconnect = () => {
