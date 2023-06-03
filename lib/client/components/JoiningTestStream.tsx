@@ -23,7 +23,7 @@ export const JoiningTestStream = ({
   toggleMic = () => {},
 }: Props) => {
   return (
-    <div className="relative flex h-2/3 w-full flex-1 overflow-hidden  p-10 lg:w-auto">
+    <div className="relative flex h-2/3 w-full flex-1 overflow-hidden  p-10 md:w-auto">
       {stream && (
         <VideoPlayer
           classNames={{ container: "shadow-inner" }}

@@ -121,9 +121,7 @@ export default function Meet({}: Props) {
   };
 
   const handlePeerOfferReceive = async ({ offer }: PeerOfferReceiveProps) => {
-    const answer = confirm(
-      "Someone wants to join your meet, do you want to join? (Y/N)"
-    );
+    const answer = confirm("Someone wants to join your meet.");
     console.log(answer);
 
     if (!answer) return;
@@ -193,7 +191,7 @@ export default function Meet({}: Props) {
 
   if (meetStatus === "joining") {
     return (
-      <div className="flex h-screen flex-col flex-wrap  items-center justify-evenly dark:bg-dark lg:flex-row">
+      <div className="flex h-screen flex-col flex-wrap  items-center justify-evenly dark:bg-dark md:flex-row">
         {myStream ? (
           <JoiningTestStream
             stream={myStream}
@@ -203,7 +201,7 @@ export default function Meet({}: Props) {
             toggleMic={toggleMic}
           />
         ) : null}
-        <div className="flex w-full flex-1 flex-col items-center gap-y-5 lg:w-auto">
+        <div className="flex w-full flex-1 flex-col items-center gap-y-5 md:w-auto">
           {askingToJoin ? (
             <div className="flex items-center pt-5">
               <ImSpinner8 className="mb-2 animate-spin text-3xl text-primary-200" />
