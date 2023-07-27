@@ -8,7 +8,7 @@ import {
 } from "react-icons/bs";
 import { ControlBtn } from "../../lib/client/components";
 import { MeetStatus } from "../../lib/client/types";
-import { useStream } from "../../lib/client/hooks";
+import { useCreatePeer, useStream } from "../../lib/client/hooks";
 import { JoiningTestStream } from "../../lib/client/components/JoiningTestStream";
 import { useRouter } from "next/router";
 import classnames from "classnames";
@@ -30,18 +30,6 @@ import { ImSpinner8 } from "react-icons/im";
 
 type Props = {};
 
-const createPeer = (options: SimplePeer.Options) => {
-  const newPeer = new SimplePeer({
-    ...options,
-    trickle: false,
-    config: {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    },
-  });
-
-  return newPeer;
-};
-
 export default function Meet({}: Props) {
   const router = useRouter();
   const { meet_id: roomId } = router?.query as { meet_id: string };
@@ -52,6 +40,15 @@ export default function Meet({}: Props) {
     socket,
     socketConnect,
   } = useSocket();
+
+  const {
+    createPeer,
+    isLoading: isCreatePeerLoading,
+    error: createPeerError,
+  } = useCreatePeer();
+
+  console.log(createPeerError);
+
   const [isCopied, setIsCopied] = useState(false);
   const [meetStatus, setMeetStatus] = useState<MeetStatus>("joining");
   const [peerStream, setPeerStream] = useState<MediaStream | null>(null);
@@ -67,7 +64,9 @@ export default function Meet({}: Props) {
   } = useStream({ video: true, audio: true });
 
   const handleCopyClick = () => {
-    navigator.clipboard.writeText(roomId);
+    navigator.clipboard.writeText(
+      `${window.location.origin}${window.location.pathname}`
+    );
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 1000);
   };
@@ -85,33 +84,37 @@ export default function Meet({}: Props) {
 
   const handleJoinCall = async () => {
     setAskingToJoin(true);
-    const newPeer = createPeer({
+    const newPeer = await createPeer({
       stream: myStream,
       initiator: true,
     });
 
+    console.log("This is creatd peer, ", newPeer);
+
     peerRef.current = newPeer;
-    newPeer.on("signal", (signal) => {
+    newPeer?.on("signal", (signal) => {
       // if (signal?.type === "offer") {
       socket?.emit(MEET_SendPeerOfferKey, { roomId, offer: signal });
       // }
+      // console.log("Logging for Offer: ", signal);
     });
-    newPeer.on("error", (err) => {
+    newPeer?.on("error", (err) => {
       console.log("error", err);
     });
-    newPeer.on("close", () => {
-      console.log("closeed XXXXXXXXXXXX");
+    newPeer?.on("close", (res: string) => {
+      console.log("closeed XXXXXXXXXXXX", res);
+      alert(res);
       setPeerStream(null);
     });
-    newPeer.on("connect", () => {
-      newPeer.send("Hello I am receiver");
+    newPeer?.on("connect", () => {
+      newPeer?.send("Hello I am receiver");
       setMeetStatus("joined");
       setAskingToJoin(false);
     });
-    newPeer.on("data", (data) => {
+    newPeer?.on("data", (data) => {
       console.log(data.toString());
     });
-    newPeer.on("stream", (stream) => {
+    newPeer?.on("stream", (stream) => {
       setPeerStream(stream);
     });
   };
@@ -121,37 +124,43 @@ export default function Meet({}: Props) {
   };
 
   const handlePeerOfferReceive = async ({ offer }: PeerOfferReceiveProps) => {
-    const answer = confirm("Someone wants to join your meet.");
-    console.log(answer);
+    if (offer?.type === "offer") {
+      const answer = confirm("Someone wants to join your meet.");
+      console.log(answer);
+      if (!answer) return;
 
-    if (!answer) return;
-    const newPeer = createPeer({
-      stream: myStream,
-    });
-    peerRef.current = newPeer;
-    newPeer.on("signal", (signal) => {
-      // if (signal?.type === "answer") {
-      socket?.emit(MEET_SendPeerAnswerKey, { roomId, answer: signal });
-      // }
-    });
-    newPeer.on("error", (err) => {
-      console.log("error", err);
-    });
-    newPeer.on("close", () => {
-      console.log("closed XXXXXXXXXXXX");
-      setPeerStream(null);
-    });
-    newPeer.on("connect", () => {
-      newPeer.send("Hello I am initiater");
-    });
-    newPeer.on("data", (data) => {
-      console.log(data.toString());
-    });
-    newPeer.on("stream", (stream) => {
-      setPeerStream(stream);
-    });
-
-    newPeer.signal(offer);
+      const newPeer = await createPeer({
+        stream: myStream,
+      });
+      console.log("This is creatd peer, ", newPeer);
+      peerRef.current = newPeer;
+      newPeer?.on("signal", (signal) => {
+        // if (signal?.type === "answer") {
+        socket?.emit(MEET_SendPeerAnswerKey, { roomId, answer: signal });
+        // }
+        // console.log("Logging for Answers: ", signal);
+      });
+      newPeer?.on("error", (err) => {
+        console.log("error", err);
+      });
+      newPeer?.on("close", (res: any) => {
+        console.log("closeed XXXXXXXXXXXX", res);
+        alert(res);
+        setPeerStream(null);
+      });
+      newPeer?.on("connect", () => {
+        newPeer?.send("Hello I am initiater");
+      });
+      newPeer?.on("data", (data) => {
+        console.log(data.toString());
+      });
+      newPeer?.on("stream", (stream) => {
+        setPeerStream(stream);
+      });
+      newPeer?.signal(offer);
+    } else {
+      peerRef.current?.signal(offer);
+    }
   };
 
   useEffect(() => {
@@ -178,12 +187,6 @@ export default function Meet({}: Props) {
   useEffect(() => {
     socketConnect();
   }, [socket]);
-
-  useEffect(() => {
-    return () => {
-      peerRef.current?.destroy();
-    };
-  }, []);
 
   if (isSocketLoading) {
     return <Loader loadingText={"Connecting to socket..."} />;
@@ -226,7 +229,7 @@ export default function Meet({}: Props) {
     <div className="flex h-screen flex-col items-center justify-evenly p-2 dark:bg-dark">
       <span className="flex items-center gap-1 rounded-full bg-light">
         <p className="rounded-lg p-2 text-sm font-semibold text-dark">
-          Room ID:
+          Room Link:
         </p>
 
         <button
@@ -234,7 +237,7 @@ export default function Meet({}: Props) {
           onClick={handleCopyClick}
         >
           <MdContentCopy className="text-dark" />
-          <p className="rounded-lg text-lg font-bold">{roomId}</p>
+          <p className="max-w-[5rem] truncate rounded-lg text-xs font-bold lg:max-w-[20rem] lg:text-sm">{`${window.location.origin}${window.location.pathname}`}</p>
           <span
             className={classnames(
               "h-2 w-2 rounded-full",
@@ -280,7 +283,9 @@ export default function Meet({}: Props) {
           {micOn ? <BsFillMicFill /> : <BsFillMicMuteFill />}
         </ControlBtn>
         <Button
-          onClick={() => router.push("/")}
+          onClick={() => {
+            router.push("/");
+          }}
           className="rounded-full bg-red-600  p-3 text-white hover:bg-red-400 active:bg-red-700"
         >
           <MdCall />
