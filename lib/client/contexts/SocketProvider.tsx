@@ -6,7 +6,11 @@ import React, {
   useState,
 } from "react";
 import io, { Socket } from "socket.io-client";
-import { MEET_CreateRoomKey, MEET_JoinRoomKey } from "../../common/utils";
+import {
+  API_BASE_URL,
+  MEET_CreateRoomKey,
+  MEET_JoinRoomKey,
+} from "../../common/utils";
 import { RoomCreateProps } from "../../common/types";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
@@ -53,7 +57,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     connectionRequestInProgressRef.current = true;
     setIsLoading(true);
 
-    const newSocket = io(`${process.env.NX_BASE_URL}`);
+    const newSocket = io(`${API_BASE_URL}`);
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
