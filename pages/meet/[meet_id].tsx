@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Loader, VideoPlayer } from "../../lib/client/components";
 import {
   BsCameraVideoFill,
@@ -47,8 +47,6 @@ export default function Meet({}: Props) {
     error: createPeerError,
   } = useCreatePeer();
 
-  console.log(createPeerError);
-
   const [isCopied, setIsCopied] = useState(false);
   const [meetStatus, setMeetStatus] = useState<MeetStatus>("joining");
   const [peerStream, setPeerStream] = useState<MediaStream | null>(null);
@@ -89,8 +87,6 @@ export default function Meet({}: Props) {
       initiator: true,
     });
 
-    console.log("This is creatd peer, ", newPeer);
-
     peerRef.current = newPeer;
     newPeer?.on("signal", (signal) => {
       // if (signal?.type === "offer") {
@@ -123,45 +119,48 @@ export default function Meet({}: Props) {
     peerRef.current?.signal(answer);
   };
 
-  const handlePeerOfferReceive = async ({ offer }: PeerOfferReceiveProps) => {
-    if (offer?.type === "offer") {
-      const answer = confirm("Someone wants to join your meet.");
-      console.log(answer);
-      if (!answer) return;
+  const handlePeerOfferReceive = useCallback(
+    async ({ offer }: PeerOfferReceiveProps) => {
+      if (offer?.type === "offer") {
+        const answer = confirm("Someone wants to join your meet.");
+        console.log(answer);
+        if (!answer) return;
 
-      const newPeer = await createPeer({
-        stream: myStream,
-      });
-      console.log("This is creatd peer, ", newPeer);
-      peerRef.current = newPeer;
-      newPeer?.on("signal", (signal) => {
-        // if (signal?.type === "answer") {
-        socket?.emit(MEET_SendPeerAnswerKey, { roomId, answer: signal });
-        // }
-        // console.log("Logging for Answers: ", signal);
-      });
-      newPeer?.on("error", (err) => {
-        console.log("error", err);
-      });
-      newPeer?.on("close", (res: any) => {
-        console.log("closeed XXXXXXXXXXXX", res);
-        alert(res);
-        setPeerStream(null);
-      });
-      newPeer?.on("connect", () => {
-        newPeer?.send("Hello I am initiater");
-      });
-      newPeer?.on("data", (data) => {
-        console.log(data.toString());
-      });
-      newPeer?.on("stream", (stream) => {
-        setPeerStream(stream);
-      });
-      newPeer?.signal(offer);
-    } else {
-      peerRef.current?.signal(offer);
-    }
-  };
+        const newPeer = await createPeer({
+          stream: myStream,
+        });
+
+        peerRef.current = newPeer;
+        newPeer?.on("signal", (signal) => {
+          // if (signal?.type === "answer") {
+          socket?.emit(MEET_SendPeerAnswerKey, { roomId, answer: signal });
+          // }
+          // console.log("Logging for Answers: ", signal);
+        });
+        newPeer?.on("error", (err) => {
+          console.log("error", err);
+        });
+        newPeer?.on("close", (res: any) => {
+          console.log("closeed XXXXXXXXXXXX", res);
+          alert(res);
+          setPeerStream(null);
+        });
+        newPeer?.on("connect", () => {
+          newPeer?.send("Hello I am initiater");
+        });
+        newPeer?.on("data", (data) => {
+          console.log(data.toString());
+        });
+        newPeer?.on("stream", (stream) => {
+          setPeerStream(stream);
+        });
+        newPeer?.signal(offer);
+      } else {
+        peerRef.current?.signal(offer);
+      }
+    },
+    [createPeer, myStream, roomId, socket]
+  );
 
   useEffect(() => {
     if (!socket && !router?.query?.initiater) return;
@@ -182,7 +181,7 @@ export default function Meet({}: Props) {
     return () => {
       socket?.off(MEET_ReceivePeerOfferKey, handlePeerOfferReceive);
     };
-  }, [socket, myStream]);
+  }, [socket, myStream, router?.query?.initiater, handlePeerOfferReceive]);
 
   useEffect(() => {
     socketConnect();
@@ -190,6 +189,10 @@ export default function Meet({}: Props) {
 
   if (isSocketLoading) {
     return <Loader loadingText={"Connecting to socket..."} />;
+  }
+
+  if (isCreatePeerLoading) {
+    return <Loader loadingText={"Creating peer..."} />;
   }
 
   if (meetStatus === "joining") {
