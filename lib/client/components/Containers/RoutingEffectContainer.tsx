@@ -11,18 +11,12 @@ const useRouteChanging = () => {
   const router = useRouter();
   const [changing, setChanging] = useState(false);
 
-  const handleRouteChangeStart = (
-    url: string,
-    { shallow }: { shallow: boolean }
-  ) => {
+  const handleRouteChangeStart = ({ shallow }: { shallow: boolean }) => {
     if (shallow) return;
     setChanging(true);
   };
 
-  const handleRouteChangeComplete = (
-    url: string,
-    { shallow }: { shallow: boolean }
-  ) => {
+  const handleRouteChangeComplete = ({ shallow }: { shallow: boolean }) => {
     if (shallow) return;
     setChanging(false);
   };

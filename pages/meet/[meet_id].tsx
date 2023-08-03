@@ -44,7 +44,7 @@ export default function Meet({}: Props) {
   const {
     createPeer,
     isLoading: isCreatePeerLoading,
-    error: createPeerError,
+    // error: createPeerError,
   } = useCreatePeer();
 
   const [isCopied, setIsCopied] = useState(false);
